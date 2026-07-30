@@ -8,6 +8,8 @@
     "deploy": "hardhat run scripts/deploy.js",
     "deploy:bsctestnet": "hardhat run scripts/deploy.js --network bsctestnet",
     "deploy:full": "hardhat run scripts/deployAndRequest.js --network bsctestnet",
+    "deploy:governance": "hardhat run scripts/deployGovernance.js",
+    "deploy:governance:bsctestnet": "hardhat run scripts/deployGovernance.js --network bsctestnet",
     "node": "hardhat node",
     "clean": "hardhat clean"
   },
@@ -17,7 +19,9 @@
     "stablecoin",
     "bsc",
     "chainlink",
-    "agriculture"
+    "agriculture",
+    "governance",
+    "dao"
   ],
   "author": "thatojane303",
   "license": "MIT",
