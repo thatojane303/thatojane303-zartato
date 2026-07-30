@@ -1,0 +1,33 @@
+{
+  "name": "thatojane303-zartato",
+  "version": "1.0.0",
+  "description": "South African Potato market based token (ZarTATO / ZRT) on BSC Testnet",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:bsctestnet": "hardhat run scripts/deploy.js --network bsctestnet",
+    "deploy:full": "hardhat run scripts/deployAndRequest.js --network bsctestnet",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
+  },
+  "keywords": [
+    "zartato",
+    "potato",
+    "stablecoin",
+    "bsc",
+    "chainlink",
+    "agriculture"
+  ],
+  "author": "thatojane303",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.22.0",
+    "chai": "^4.3.10"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.4.5"
+  }
+}
