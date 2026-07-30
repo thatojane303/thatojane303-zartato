@@ -1,0 +1,52 @@
+name: Daily ZRT Price Update
+
+on:
+  schedule:
+    # 08:00 UTC = 10:00 SAST, Mon–Fri
+    - cron: "0 8 * * 1-5"
+  workflow_dispatch:
+
+jobs:
+  update-price:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Request / set price on oracle
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          ORACLE_ADDR: ${{ secrets.ORACLE_ADDR }}
+          SUB_ID: ${{ secrets.SUB_ID }}
+          BSC_TESTNET_RPC: https://data-seed-prebsc-1-s1.binance.org:8545/
+        run: |
+          if [ -z "$PRIVATE_KEY" ] || [ -z "$ORACLE_ADDR" ]; then
+            echo "Missing PRIVATE_KEY or ORACLE_ADDR secrets — skipping live update"
+            exit 0
+          fi
+          node -e "
+          const { ethers } = require('ethers');
+          (async () => {
+            const provider = new ethers.JsonRpcProvider(process.env.BSC_TESTNET_RPC);
+            const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+            const abi = [
+              'function requestPriceUpdate() returns (bytes32)',
+              'function setPrice(uint256 price)',
+              'function getPrice() view returns (uint256)'
+            ];
+            const oracle = new ethers.Contract(process.env.ORACLE_ADDR, abi, wallet);
+            const tx = await oracle.requestPriceUpdate();
+            console.log('request tx', tx.hash);
+            await tx.wait();
+            // Until live Functions callback is wired, operator may setPrice off-chain
+            console.log('Request submitted. Fulfill via Chainlink Functions or setPrice.');
+          })().catch((e) => { console.error(e); process.exit(1); });
+          "
