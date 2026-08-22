@@ -19,7 +19,7 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
     - run: rm -rf node_modules package-lock.json
     - run: npm cache clean --force
-    - run: npm install --no-audit --no-fund
+    - run: npm install --no-audit --no-fund --legacy-peer-deps
     - run: npx hardhat compile
       env:
         PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
