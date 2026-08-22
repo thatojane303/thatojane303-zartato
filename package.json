@@ -1,37 +1,32 @@
 {
-  "name": "thatojane303-zartato",
+  "name": "zartato-trust-wallet",
   "version": "1.0.0",
-  "description": "South African Potato market based token (ZarTATO / ZRT) on BSC Testnet",
+  "description": "ZarTATO RWA (Potato) Token with Trust Wallet ERC-4337 Account Abstraction Integration",
+  "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js",
-    "deploy:bsctestnet": "hardhat run scripts/deploy.js --network bsctestnet",
-    "deploy:full": "hardhat run scripts/deployAndRequest.js --network bsctestnet",
-    "deploy:governance": "hardhat run scripts/deployGovernance.js",
-    "deploy:governance:bsctestnet": "hardhat run scripts/deployGovernance.js --network bsctestnet",
-    "node": "hardhat node",
-    "clean": "hardhat clean"
+    "verify": "certora run certora/specs/Paymaster.spec"
   },
   "keywords": [
+    "erc4337",
+    "account-abstraction",
+    "paymaster",
+    "flexgas",
+    "rwa",
     "zartato",
-    "potato",
-    "stablecoin",
-    "bsc",
-    "chainlink",
-    "agriculture",
-    "governance",
-    "dao"
+    "trust-wallet"
   ],
-  "author": "thatojane303",
+  "author": "Thato Jane",
   "license": "MIT",
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.22.0",
-    "chai": "^4.3.10"
-  },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
-    "dotenv": "^16.4.5"
+    "@account-abstraction/contracts": "^0.7.0",
+    "@openzeppelin/contracts": "^5.0.0"
+  },
+  "devDependencies": {
+    "hardhat": "^2.19.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "ethers": "^6.10.0"
   }
 }
