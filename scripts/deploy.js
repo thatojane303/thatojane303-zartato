@@ -1,10 +1,11 @@
 const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("🔑  Deploying with:", deployer.address);
   const balance = await hre.ethers.provider.getBalance(deployer.address);
-  console.log("💰  Balance:", hre.ethers.formatEther(balance), "BNB");
+  console.log("💰  Balance:", hre.ethers.formatEther(balance), hre.network.name === 'bsctestnet' ? 'BNB' : 'ETH');
 
   const FUNCTIONS_ROUTER =
     process.env.FUNCTIONS_ROUTER || "0x6E2dc0F9DB014aE19888F8D5C34D1c5ED1591715";
@@ -44,6 +45,22 @@ async function main() {
   console.log("  Deployer:       ", deployer.address);
   console.log("  Network:        ", hre.network.name);
   console.log("============================================================");
+
+  // write deployment info to file for CI or later use
+  const out = {
+    token: tokenAddr,
+    oracle: oracleAddr,
+    deployer: deployer.address,
+    network: hre.network.name,
+    functionsRouter: FUNCTIONS_ROUTER,
+  };
+
+  try {
+    fs.writeFileSync("deployment.json", JSON.stringify(out, null, 2));
+    console.log("deployment.json written");
+  } catch (err) {
+    console.warn("Could not write deployment.json:", err.message);
+  }
 }
 
 main().catch((err) => {
