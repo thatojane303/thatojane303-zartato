@@ -1,0 +1,19 @@
+{
+  "network": "baseMainnet",
+  "chainId": 8453,
+  "token": {
+    "name": "ZarTATO",
+    "symbol": "ZRT",
+    "totalSupply": "1000000000",
+    "decimals": 18,
+    "address": "0x0000000000000000000000000000000000000000",
+    "verified": false,
+    "model": "BRETT trade-only, fixed supply, no mint, no farm backing"
+  },
+  "dex": {
+    "primary": "Aerodrome Finance",
+    "pool": "ZRT/WETH - pending deployment",
+    "lock": "12 months"
+  },
+  "disclaimer": "Educational & cultural experiment on Base L2. No intrinsic value. Not financial advice. No potato backing."
+}
