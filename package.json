@@ -1,33 +1,23 @@
 {
-  "name": "zartato-trust-wallet",
+  "name": "zartato",
   "version": "1.0.0",
-  "description": "ZarTATO RWA (Potato) Token with Trust Wallet ERC-4337 Account Abstraction Integration",
+  "description": "ZarTATO (ZRT) - BRETT model meme on Base. Trade-only on Aerodrome, educational, no intrinsic value.",
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.js",
-    "verify": "certora run certora/specs/Paymaster.spec"
+    "deploy": "hardhat run scripts/deploy.js --network baseMainnet"
   },
-  "keywords": [
-    "erc4337",
-    "account-abstraction",
-    "paymaster",
-    "flexgas",
-    "rwa",
-    "zartato",
-    "trust-wallet"
-  ],
+  "keywords": ["meme", "base", "aerodrome", "brett-model", "zartato"],
   "author": "Thato Jane",
   "license": "MIT",
   "dependencies": {
-    "@account-abstraction/contracts": "^0.7.0",
-    "@openzeppelin/contracts": "^5.0.0"
+    "@openzeppelin/contracts": "^5.0.0",
+    "discord.js": "^14.14.0"
   },
   "devDependencies": {
     "hardhat": "^2.19.0",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@nomicfoundation/hardhat-ethers": "^2.0.0",
     "ethers": "^6.10.0"
   }
 }
