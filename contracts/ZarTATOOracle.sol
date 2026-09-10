@@ -1,30 +1,36 @@
-# ZarTATO Tokenomics — BRETT Trade-Only Model
+/**
+ * Thandi.js — Informational Price Feed (NOT backing)
+ * Educational context only for ZarTATO — BRETT model = DEX price only
+ */
 
-**Fixed Supply: 1,000,000,000 ZRT (No Mint Function)**
+require('dotenv').config();
+const { ethers } = require("ethers");
 
-## Allocation
+const BASE_RPC = "https://mainnet.base.org";
+const ZRT_ADDRESS = process.env.ZRT_ADDRESS || "0x...pending_deployment";
 
-| Category | % | Amount | Notes |
-|----------|---|--------|-------|
-| Aerodrome LP | 40% | 400M | Locked liquidity, trade-only price discovery |
-| Oracle & Infra | 15% | 150M | Thandi.js informational feed, not backing |
-| Community & Education | 15% | 150M | Musa Bot, content, SA education |
-| Team | 15% | 150M | 12-month linear vest |
-| Treasury | 15% | 150M | Grants, audits, future dev |
+async function getAerodromePrice() {
+  // Placeholder: fetch ZRT/WETH price from Aerodrome subgraph/API
+  // Educational only — does NOT set token value
+  console.log("[Thandi] Fetching informational ZRT price from Aerodrome...");
+  // TODO: Integrate Aerodrome API after deployment
+  return { price: "0.00", source: "aerodrome", timestamp: Date.now() };
+}
 
-## Key Principles (For Aerodrome Grants)
+async function getSAContext() {
+  // Informational SA market context — NOT used for pegging
+  console.log("[Thandi] SA context (educational): Potato bag ~R50-80, not related to ZRT price");
+  return { note: "Educational context only, ZRT price is DEX-driven" };
+}
 
-1. **No Reserve Backing** — ZRT is NOT backed by potatoes, ZAR, or commodities. Price = DEX trading only.
-2. **No Mint/Burn** — `TOTAL_SUPPLY` immutable in constructor. No owner mint.
-3. **No Yield Farming** — No staking rewards, no APY promises. BRETT model = trade only.
-4. **No Oracle Peg** — Thandi.js provides informational SA market context, does NOT set on-chain price.
-5. **Educational Disclaimer** — All docs state: educational/cultural experiment, not financial advice.
+async function main() {
+  const price = await getAerodromePrice();
+  const context = await getSAContext();
+  console.log(JSON.stringify({ price, context }, null, 2));
+}
 
-## Vesting
+if (require.main === module) {
+  main();
+}
 
-- Team: 12-month cliff + linear (via Sablier or manual)
-- LP: Locked 12 months via Aerodrome locker
-
-## Compliance Note
-
-This model avoids security-like promises (no backing, no yield) to align with Base ecosystem educational grants.
+module.exports = { getAerodromePrice, getSAContext };
