@@ -1,0 +1,546 @@
+diff --git a/contracts/ZarTATOOracle.sol b/contracts/ZarTATOOracle.sol
+new file mode 100644
+index 0000000..aaaaaaaa
+--- /dev/null
++++ b/contracts/ZarTATOOracle.sol
+@@ -0,0 +1,84 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.20;
++
++import "@openzeppelin/contracts/access/Ownable.sol";
++import "@openzeppelin/contracts/security/Pausable.sol";
++
++contract ZarTATOOracle is Ownable, Pausable {
++    uint256 public latestPrice;      // price per unit (e.g. per potato or per kg)
++    uint256 public lastUpdated;      // timestamp of last update
++    uint256 public maxChangeBps;     // max allowed change in basis points (e.g. 500 = 5%)
++    uint256 public maxAgeSeconds;    // max allowed age before considered stale
++
++    event PriceUpdated(uint256 newPrice);
++
++    error MaxChangeExceeded();
++    error StalePrice();
++
++    constructor(
++        address owner_,
++        uint256 maxChangeBps_,
++        uint256 maxAgeSeconds_
++    ) {
++        require(owner_ != address(0), "owner zero");
++        _transferOwnership(owner_);
++        maxChangeBps = maxChangeBps_;
++        maxAgeSeconds = maxAgeSeconds_;
++    }
++
++    function updatePrice(uint256 newPrice) external onlyOwner whenNotPaused {
++        require(newPrice > 0, "price zero");
++
++        if (latestPrice != 0) {
++            uint256 diff = newPrice > latestPrice
++                ? newPrice - latestPrice
++                : latestPrice - newPrice;
++
++            uint256 diffBps = (diff * 10_000) / latestPrice;
++            if (diffBps > maxChangeBps) {
++                revert MaxChangeExceeded();
++            }
++        }
++
++        latestPrice = newPrice;
++        lastUpdated = block.timestamp;
++
++        emit PriceUpdated(newPrice);
++    }
++
++    function getLatestPrice() external view returns (uint256) {
++        return latestPrice;
++    }
++
++    function getLastUpdated() external view returns (uint256) {
++        return lastUpdated;
++    }
++
++    function isStale() public view returns (bool) {
++        if (lastUpdated == 0) return true;
++        return block.timestamp - lastUpdated > maxAgeSeconds;
++    }
++
++    function requireFresh() public view {
++        if (isStale()) {
++            revert StalePrice();
++        }
++    }
++
++    function pause() external onlyOwner {
++        _pause();
++    }
++
++    function unpause() external onlyOwner {
++        _unpause();
++    }
++}
+diff --git a/contracts/ZarTATO.sol b/contracts/ZarTATO.sol
+new file mode 100644
+index 0000000..bbbbbbbb
+--- /dev/null
++++ b/contracts/ZarTATO.sol
+@@ -0,0 +1,118 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.20;
++
++import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
++import "@openzeppelin/contracts/access/Ownable.sol";
++import "@openzeppelin/contracts/security/Pausable.sol";
++
++interface IZarTATOOracle {
++    function getLatestPrice() external view returns (uint256);
++    function isStale() external view returns (bool);
++}
++
++contract ZarTATO is ERC20, Ownable, Pausable {
++    IZarTATOOracle public oracle;
++
++    bool public transfersRestricted;
++    string public underlyingCommodity; // e.g. "South African potatoes"
++    string public marketRegion;        // e.g. "ZA"
++
++    event Mint(address indexed to, uint256 amount);
++    event Burn(address indexed from, uint256 amount);
++    event TransfersRestricted(bool restricted);
++
++    error TransfersBlocked();
++    error OracleStale();
++
++    constructor(
++        address oracleAddress,
++        string memory name_,
++        string memory symbol_,
++        string memory underlyingCommodity_,
++        string memory marketRegion_
++    ) ERC20(name_, symbol_) {
++        require(oracleAddress != address(0), "oracle zero");
++        oracle = IZarTATOOracle(oracleAddress);
++        underlyingCommodity = underlyingCommodity_;
++        marketRegion = marketRegion_;
++    }
++
++    function _beforeTokenTransfer(
++        address from,
++        address to,
++        uint256 amount
++    ) internal override {
++        super._beforeTokenTransfer(from, to, amount);
++
++        if (paused()) {
++            revert("Pausable: paused");
++        }
++
++        if (transfersRestricted && from != address(0)) {
++            revert TransfersBlocked();
++        }
++    }
++
++    function mint(address to, uint256 amount) external onlyOwner {
++        _mint(to, amount);
++        emit Mint(to, amount);
++    }
++
++    function burn(uint256 amount) external {
++        _burn(_msgSender(), amount);
++        emit Burn(_msgSender(), amount);
++    }
++
++    function latestPrice() public view returns (uint256) {
++        if (oracle.isStale()) {
++            revert OracleStale();
++        }
++        return oracle.getLatestPrice();
++    }
++
++    function valuation(uint256 amount) external view returns (uint256) {
++        uint256 price = latestPrice();
++        return amount * price;
++    }
++
++    function setTransfersRestricted(bool restricted) external onlyOwner {
++        transfersRestricted = restricted;
++        emit TransfersRestricted(restricted);
++    }
++
++    function setOracle(address newOracle) external onlyOwner {
++        require(newOracle != address(0), "oracle zero");
++        oracle = IZarTATOOracle(newOracle);
++    }
++
++    function pause() external onlyOwner {
++        _pause();
++    }
++
++    function unpause() external onlyOwner {
++        _unpause();
++    }
++}
+diff --git a/test/ZarTATOOracle.full.test.js b/test/ZarTATOOracle.full.test.js
+new file mode 100644
+index 0000000..cccccccc
+--- /dev/null
++++ b/test/ZarTATOOracle.full.test.js
+@@ -0,0 +1,88 @@
++const { expect } = require("chai");
++const { ethers } = require("hardhat");
++
++describe("ZarTATOOracle", () => {
++  let owner, user;
++  let oracle;
++
++  beforeEach(async () => {
++    [owner, user] = await ethers.getSigners();
++
++    const Oracle = await ethers.getContractFactory("ZarTATOOracle");
++    oracle = await Oracle.deploy(owner.address, 500, 3600);
++    await oracle.waitForDeployment();
++  });
++
++  it("initially has no price and is stale", async () => {
++    expect(await oracle.getLatestPrice()).to.equal(0);
++    expect(await oracle.isStale()).to.equal(true);
++  });
++
++  it("owner can update price and emits event", async () => {
++    await expect(oracle.connect(owner).updatePrice(1000))
++      .to.emit(oracle, "PriceUpdated")
++      .withArgs(1000);
++
++    expect(await oracle.getLatestPrice()).to.equal(1000);
++    expect(await oracle.getLastUpdated()).to.be.gt(0);
++    expect(await oracle.isStale()).to.equal(false);
++  });
++
++  it("non-owner cannot update price", async () => {
++    await expect(
++      oracle.connect(user).updatePrice(1000)
++    ).to.be.revertedWith("Ownable: caller is not the owner");
++  });
++
++  it("reverts on excessive price change", async () => {
++    await oracle.connect(owner).updatePrice(1000);
++
++    await expect(
++      oracle.connect(owner).updatePrice(2000)
++    ).to.be.revertedWithCustomError(oracle, "MaxChangeExceeded");
++  });
++
++  it("allows small change within maxChangeBps", async () => {
++    await oracle.connect(owner).updatePrice(1000);
++    await oracle.connect(owner).updatePrice(1040);
++    expect(await oracle.getLatestPrice()).to.equal(1040);
++  });
++
++  it("becomes stale after maxAgeSeconds", async () => {
++    await oracle.connect(owner).updatePrice(1000);
++
++    await ethers.provider.send("evm_increaseTime", [4000]);
++    await ethers.provider.send("evm_mine", []);
++
++    expect(await oracle.isStale()).to.equal(true);
++  });
++
++  it("pause blocks updates and unpause restores", async () => {
++    await oracle.connect(owner).pause();
++
++    await expect(
++      oracle.connect(owner).updatePrice(1000)
++    ).to.be.revertedWith("Pausable: paused");
++
++    await oracle.connect(owner).unpause();
++    await oracle.connect(owner).updatePrice(1000);
++    expect(await oracle.getLatestPrice()).to.equal(1000);
++  });
++});
+diff --git a/test/ZarTATO.full.test.js b/test/ZarTATO.full.test.js
+new file mode 100644
+index 0000000..dddddddd
+--- /dev/null
++++ b/test/ZarTATO.full.test.js
+@@ -0,0 +1,112 @@
++const { expect } = require("chai");
++const { ethers } = require("hardhat");
++
++describe("ZarTATO", () => {
++  let owner, user, other;
++  let token, oracle;
++
++  beforeEach(async () => {
++    [owner, user, other] = await ethers.getSigners();
++
++    const Oracle = await ethers.getContractFactory("ZarTATOOracle");
++    oracle = await Oracle.deploy(owner.address, 500, 3600);
++    await oracle.waitForDeployment();
++
++    const Token = await ethers.getContractFactory("ZarTATO");
++    token = await Token.deploy(
++      await oracle.getAddress(),
++      "ZarTATO",
++      "ZTATO",
++      "South African potatoes",
++      "ZA"
++    );
++    await token.waitForDeployment();
++  });
++
++  it("owner can mint and user can burn", async () => {
++    await expect(token.connect(owner).mint(user.address, 1000n))
++      .to.emit(token, "Mint")
++      .withArgs(user.address, 1000n);
++
++    expect(await token.balanceOf(user.address)).to.equal(1000n);
++
++    await expect(token.connect(user).burn(400n))
++      .to.emit(token, "Burn")
++      .withArgs(user.address, 400n);
++
++    expect(await token.balanceOf(user.address)).to.equal(600n);
++  });
++
++  it("non-owner cannot mint", async () => {
++    await expect(
++      token.connect(user).mint(user.address, 1000n)
++    ).to.be.revertedWith("Ownable: caller is not the owner");
++  });
++
++  it("transfers work when not paused and not restricted", async () => {
++    await token.connect(owner).mint(user.address, 1000n);
++    await token.connect(user).transfer(other.address, 300n);
++
++    expect(await token.balanceOf(user.address)).to.equal(700n);
++    expect(await token.balanceOf(other.address)).to.equal(300n);
++  });
++
++  it("pause blocks transfers", async () => {
++    await token.connect(owner).mint(user.address, 1000n);
++    await token.connect(owner).pause();
++
++    await expect(
++      token.connect(user).transfer(other.address, 100n)
++    ).to.be.revertedWith("Pausable: paused");
++  });
++
++  it("transfer restriction blocks non-mint transfers", async () => {
++    await token.connect(owner).mint(user.address, 1000n);
++    await token.connect(owner).setTransfersRestricted(true);
++
++    await expect(
++      token.connect(user).transfer(other.address, 100n)
++    ).to.be.revertedWithCustomError(token, "TransfersBlocked");
++  });
++
++  it("latestPrice reverts when oracle is stale", async () => {
++    await oracle.connect(owner).updatePrice(1000);
++
++    await ethers.provider.send("evm_increaseTime", [4000]);
++    await ethers.provider.send("evm_mine", []);
++
++    await expect(token.latestPrice()).to.be.revertedWithCustomError(
++      token,
++      "OracleStale"
++    );
++  });
++
++  it("valuation scales with oracle price", async () => {
++    await token.connect(owner).mint(user.address, 1000n);
++
++    await oracle.connect(owner).updatePrice(1000);
++    const val1 = await token.valuation(1000n);
++
++    await oracle.connect(owner).updatePrice(1500);
++    const val2 = await token.valuation(1000n);
++
++    expect(val2).to.be.gt(val1);
++  });
++});
+diff --git a/test/integration.token-oracle.test.js b/test/integration.token-oracle.test.js
+new file mode 100644
+index 0000000..eeeeeeee
+--- /dev/null
++++ b/test/integration.token-oracle.test.js
+@@ -0,0 +1,52 @@
++const { expect } = require("chai");
++const { ethers } = require("hardhat");
++
++describe("Integration: ZarTATO ↔ ZarTATOOracle", () => {
++  let owner, user;
++  let token, oracle;
++
++  beforeEach(async () => {
++    [owner, user] = await ethers.getSigners();
++
++    const Oracle = await ethers.getContractFactory("ZarTATOOracle");
++    oracle = await Oracle.deploy(owner.address, 500, 3600);
++    await oracle.waitForDeployment();
++
++    const Token = await ethers.getContractFactory("ZarTATO");
++    token = await Token.deploy(
++      await oracle.getAddress(),
++      "ZarTATO",
++      "ZTATO",
++      "South African potatoes",
++      "ZA"
++    );
++    await token.waitForDeployment();
++  });
++
++  it("token valuation responds to oracle price changes", async () => {
++    await token.connect(owner).mint(user.address, 1000n);
++
++    await oracle.connect(owner).updatePrice(1000);
++    const val1 = await token.valuation(1000n);
++
++    await oracle.connect(owner).updatePrice(2000);
++    const val2 = await token.valuation(1000n);
++
++    expect(val2).to.be.gt(val1);
++  });
++
++  it("token.latestPrice matches oracle.getLatestPrice when fresh", async () => {
++    await oracle.connect(owner).updatePrice(777);
++    const latest = await token.latestPrice();
++    expect(latest).to.equal(777);
++  });
++});
+diff --git a/.copilot/ZARTATO.context.md b/.copilot/ZARTATO.context.md
+new file mode 100644
+index 0000000..ffffffff
+--- /dev/null
++++ b/.copilot/ZARTATO.context.md
+@@ -0,0 +1,32 @@
++# ZARTATO Project Context
++
++This repository contains the full architecture for the ZARTATO commodity-backed token.
++
++## Core Components
++- ZarTATO.sol (ERC20 + compliance + oracle integration)
++- ZarTATOOracle.sol (price feed + staleness + maxChangeBps)
++- Full Hardhat test suite
++- Compliance hooks
++- Chainlink Functions integration (future)
++- Thirdweb API integration (future)
++
++## Coding Standards
++- Use OpenZeppelin 5.x
++- Use Hardhat + ethers v6
++- Use revert custom errors
++- Use clean architecture patterns
++
++## Copilot Instructions
++- Always maintain compatibility with the oracle contract.
++- Always preserve compliance hooks.
++- Always generate code that compiles under Hardhat.
++- Always align tests with contract behavior.
+diff --git a/.github/pull_request_template.md b/.github/pull_request_template.md
+new file mode 100644
+index 0000000..11111111
+--- /dev/null
++++ b/.github/pull_request_template.md
+@@ -0,0 +1,20 @@
++# ZARTATO PR
++
++This PR follows the architecture defined by Microsoft Copilot in the ZARTATO sync workflow.
++
++## Checklist
++- [ ] Contract changes align with oracle logic
++- [ ] Tests updated to match contract behavior
++- [ ] Compliance hooks preserved
++- [ ] No breaking changes to valuation()
++- [ ] Hardhat tests pass
++
++## Notes for GitHub Copilot
++Please refactor code according to:
++- ZARTATO.context.md
++- Contract architecture
++- Oracle constraints
+diff --git a/.vscode/copilot-instructions.md b/.vscode/copilot-instructions.md
+new file mode 100644
+index 0000000..22222222
+--- /dev/null
++++ b/.vscode/copilot-instructions.md
+@@ -0,0 +1,14 @@
++# Copilot Workspace Instructions
++
++You are assisting with the ZARTATO token architecture.
++
++Follow these rules:
++- Maintain oracle → token integration
++- Maintain compliance restrictions
++- Maintain valuation logic
++- Maintain test alignment
++- Use OpenZeppelin 5.x
++- Use ethers v6
+diff --git a/.github/workflows/zartato-sync.yml b/.github/workflows/zartato-sync.yml
+new file mode 100644
+index 0000000..33333333
+--- /dev/null
++++ b/.github/workflows/zartato-sync.yml
+@@ -0,0 +1,18 @@
++name: ZARTATO Sync
++
++on:
++  push:
++    branches:
++      - main
++      - zartato-test-suite
++
++jobs:
++  sync:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v3
++
++      - name: Inject Copilot Context
++        run: |
++          echo "Syncing ZARTATO context..."
++          cp .copilot/ZARTATO.context.md .github/COPILOT_CONTEXT.md
+diff --git b/ZARTATO.sync.md a/ZARTATO.sync.md
+new file mode 100644
+index 0000000..44444444
+--- /dev/null
++++ b/ZARTATO.sync.md
+@@ -0,0 +1,40 @@
++# ZARTATO Sync Memory
++
++This file is maintained by Microsoft Copilot.
++
++It contains:
++- Architecture decisions
++- Contract updates
++- Test suite updates
++- Compliance notes
++- Oracle tuning
++- Chainlink integration notes
++
++## Architecture Decisions
++- ERC20 + compliance + oracle valuation
++- Oracle enforces maxChangeBps, maxAgeSeconds, staleness, pause
++- Token enforces transfer restrictions, pause, mint/burn, oracle freshness
++- Valuation: amount * price
++
++## Contract Updates
++- ZarTATO.sol: ERC20 + compliance + oracle integration + valuation
++- ZarTATOOracle.sol: price feed + staleness + maxChangeBps + pause
++
++## Test Suite
++- Full coverage for mint/burn, transfers, pause, restrictions, oracle updates, staleness, valuation, integration
++
++## Compliance Notes
++- Transfer restriction blocks non-mint transfers
++- Pause blocks all transfers
++- Oracle staleness blocks valuation and latestPrice()
++
++## Oracle Tuning
++- maxChangeBps = 500
++- maxAgeSeconds = 3600
++
++## Chainlink Integration Notes
++- Oracle designed to accept Chainlink Functions updates
++
++## Pending
++- Add Chainlink, Thirdweb, Aerodrome, compliance modules, commodity metadata registry
