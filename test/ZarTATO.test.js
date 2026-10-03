@@ -1,121 +1,154 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("ZarTATO Full Suite", function () {
-  let token, oracle, mockRouter, multisig;
-  let owner, s1, s2, s3, user;
+describe("ZarTATO ERC-20 Fixed Supply", function () {
+  let token;
+  let owner, addr1, addr2;
 
-  const INITIAL_RESERVES = 1000n; // bags
-  const ONE = 10n ** 18n;
+  const FIXED_SUPPLY = ethers.parseUnits("1000000000", 18); // 1B tokens
 
   beforeEach(async function () {
-    [owner, s1, s2, s3, user] = await ethers.getSigners();
-
-    const MockRouter = await ethers.getContractFactory("MockFunctionsRouter");
-    mockRouter = await MockRouter.deploy();
-    await mockRouter.waitForDeployment();
-
-    const Oracle = await ethers.getContractFactory("ZarTATOOracle");
-    oracle = await Oracle.deploy(owner.address, await mockRouter.getAddress());
-    await oracle.waitForDeployment();
+    [owner, addr1, addr2] = await ethers.getSigners();
 
     const Token = await ethers.getContractFactory("ZarTATO");
-    token = await Token.deploy(owner.address);
+    token = await Token.deploy();
     await token.waitForDeployment();
-
-    await token.setOracle(await oracle.getAddress());
-    await token.updateReserves(INITIAL_RESERVES);
-
-    const MultiSig = await ethers.getContractFactory("ZarTATO_MultiSig");
-    multisig = await MultiSig.deploy(
-      [owner.address, s1.address, s2.address, s3.address],
-      3
-    );
-    await multisig.waitForDeployment();
   });
 
-  describe("Reserve Constraints", function () {
-    it("Should not mint more than reserves", async function () {
-      const over = (INITIAL_RESERVES + 1n) * ONE;
-      await expect(token.mint(user.address, over)).to.be.revertedWith(
-        "ZarTATO: exceeds reserves"
-      );
+  describe("Deployment", function () {
+    it("should have correct name", async function () {
+      expect(await token.name()).to.equal("ZarTATO");
     });
 
-    it("Should allow minting within reserves", async function () {
-      const amount = 100n * ONE;
-      await token.mint(user.address, amount);
-      expect(await token.balanceOf(user.address)).to.equal(amount);
-      expect(await token.totalSupply()).to.equal(amount);
+    it("should have correct symbol", async function () {
+      expect(await token.symbol()).to.equal("ZRT");
     });
 
-    it("Should allow burning and update supply", async function () {
-      const amount = 50n * ONE;
-      await token.mint(user.address, amount);
-      await token.connect(user).burn(20n * ONE);
-      expect(await token.balanceOf(user.address)).to.equal(30n * ONE);
-      expect(await token.totalSupply()).to.equal(30n * ONE);
+    it("should have 18 decimals", async function () {
+      expect(await token.decimals()).to.equal(18);
     });
 
-    it("Should track 1 ZRT = 1 bag = 10kg capacity", async function () {
-      expect(await token.reserveBags()).to.equal(INITIAL_RESERVES);
-      expect(await token.remainingMintCapacity()).to.equal(INITIAL_RESERVES * ONE);
-      await token.mint(user.address, 10n * ONE);
-      expect(await token.remainingMintCapacity()).to.equal(990n * ONE);
+    it("should have 1B total supply", async function () {
+      expect(await token.totalSupply()).to.equal(FIXED_SUPPLY);
+    });
+
+    it("should mint full supply to deployer", async function () {
+      expect(await token.balanceOf(owner.address)).to.equal(FIXED_SUPPLY);
     });
   });
 
-  describe("Oracle Integration", function () {
-    it("Should revert getPrice if oracle has no price yet", async function () {
-      await expect(token.getPrice()).to.be.revertedWith("ZarTATOOracle: no price yet");
+  describe("ERC-20 Standard Functions", function () {
+    it("should transfer tokens", async function () {
+      const amount = ethers.parseUnits("100", 18);
+      await token.transfer(addr1.address, amount);
+      expect(await token.balanceOf(addr1.address)).to.equal(amount);
+      expect(await token.balanceOf(owner.address)).to.equal(FIXED_SUPPLY - amount);
     });
 
-    it("Should allow owner to set oracle price", async function () {
-      await oracle.setPrice(4500); // e.g. R45.00 in cents
-      expect(await token.getPrice()).to.equal(4500);
-      expect(await oracle.lastUpdated()).to.be.gt(0);
+    it("should approve and transferFrom", async function () {
+      const amount = ethers.parseUnits("100", 18);
+      await token.approve(addr1.address, amount);
+      expect(await token.allowance(owner.address, addr1.address)).to.equal(amount);
+
+      await token.connect(addr1).transferFrom(owner.address, addr2.address, amount);
+      expect(await token.balanceOf(addr2.address)).to.equal(amount);
     });
 
-    it("Should not allow non-owner to set oracle", async function () {
-      await expect(oracle.connect(user).setPrice(1000)).to.be.reverted;
+    it("should emit Transfer event", async function () {
+      const amount = ethers.parseUnits("100", 18);
+      await expect(token.transfer(addr1.address, amount))
+        .to.emit(token, "Transfer")
+        .withArgs(owner.address, addr1.address, amount);
     });
 
-    it("Should fulfill via mock router", async function () {
-      const reqId = await oracle.requestPriceUpdate.staticCall();
-      await oracle.requestPriceUpdate();
-      await mockRouter.simulateFulfill(await oracle.getAddress(), reqId, 5200);
-      expect(await oracle.getPrice()).to.equal(5200);
+    it("should emit Approval event", async function () {
+      const amount = ethers.parseUnits("100", 18);
+      await expect(token.approve(addr1.address, amount))
+        .to.emit(token, "Approval")
+        .withArgs(owner.address, addr1.address, amount);
+    });
+  });
+
+  describe("Fixed Supply Immutability", function () {
+    it("should prevent minting", async function () {
+      const amount = ethers.parseUnits("1", 18);
+      await expect(token.mint(addr1.address, amount))
+        .to.be.revertedWith("ZarTATO: minting disabled - fixed supply");
+    });
+
+    it("should prevent burning", async function () {
+      // Transfer some tokens first
+      const amount = ethers.parseUnits("100", 18);
+      await token.transfer(addr1.address, amount);
+
+      // Try to burn
+      await expect(token.connect(addr1).burn(amount))
+        .to.be.revertedWith("ZarTATO: burning disabled - fixed supply");
+    });
+
+    it("should prevent burnFrom", async function () {
+      const amount = ethers.parseUnits("100", 18);
+      await token.transfer(addr1.address, amount);
+      await token.connect(addr1).approve(owner.address, amount);
+
+      await expect(token.burnFrom(addr1.address, amount))
+        .to.be.revertedWith("ZarTATO: burning disabled - fixed supply");
+    });
+
+    it("total supply should remain constant", async function () {
+      const initialSupply = await token.totalSupply();
+      
+      // Transfer around
+      const amount = ethers.parseUnits("1000000", 18);
+      await token.transfer(addr1.address, amount);
+      await token.connect(addr1).transfer(addr2.address, amount / 2n);
+
+      // Supply should not change
+      expect(await token.totalSupply()).to.equal(initialSupply);
     });
   });
 
   describe("Access Control", function () {
-    it("Should only allow owner to mint", async function () {
-      await expect(token.connect(user).mint(user.address, ONE)).to.be.reverted;
+    it("should allow only owner to call mint (reverted)", async function () {
+      const amount = ethers.parseUnits("1", 18);
+      await expect(token.connect(addr1).mint(addr1.address, amount))
+        .to.be.revertedWith("Ownable: caller is not the owner");
     });
 
-    it("Should only allow owner to update reserves", async function () {
-      await expect(token.connect(user).updateReserves(500)).to.be.reverted;
-    });
-
-    it("Should only allow owner to set oracle on token", async function () {
-      await expect(token.connect(user).setOracle(user.address)).to.be.reverted;
+    it("should have owner", async function () {
+      expect(await token.owner()).to.equal(owner.address);
     });
   });
 
-  describe("MultiSig", function () {
-    it("Should deploy with correct signers and threshold", async function () {
-      expect(await multisig.required()).to.equal(3);
-      expect(await multisig.isSigner(owner.address)).to.equal(true);
-      expect(await multisig.isSigner(s1.address)).to.equal(true);
-      expect(await multisig.isSigner(user.address)).to.equal(false);
+  describe("Multiple Transfers", function () {
+    it("should handle multiple transfers correctly", async function () {
+      const amount1 = ethers.parseUnits("1000000", 18);
+      const amount2 = ethers.parseUnits("500000", 18);
+
+      await token.transfer(addr1.address, amount1);
+      await token.transfer(addr2.address, amount2);
+
+      expect(await token.balanceOf(addr1.address)).to.equal(amount1);
+      expect(await token.balanceOf(addr2.address)).to.equal(amount2);
+      expect(await token.balanceOf(owner.address)).to.equal(
+        FIXED_SUPPLY - amount1 - amount2
+      );
     });
 
-    it("Should allow signer to submit a transaction", async function () {
-      const data = token.interface.encodeFunctionData("updateReserves", [2000]);
-      await expect(
-        multisig.submitTransaction(await token.getAddress(), 0, data)
-      ).to.emit(multisig, "Submit");
-      expect(await multisig.txCount()).to.equal(1);
+    it("should handle circular transfers", async function () {
+      const amount = ethers.parseUnits("100", 18);
+
+      // owner → addr1
+      await token.transfer(addr1.address, amount);
+      expect(await token.balanceOf(addr1.address)).to.equal(amount);
+
+      // addr1 → addr2
+      await token.connect(addr1).transfer(addr2.address, amount);
+      expect(await token.balanceOf(addr2.address)).to.equal(amount);
+
+      // addr2 → owner
+      await token.connect(addr2).transfer(owner.address, amount);
+      expect(await token.balanceOf(owner.address)).to.equal(FIXED_SUPPLY);
     });
   });
 });
