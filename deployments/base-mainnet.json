@@ -8,12 +8,12 @@
     "decimals": 18,
     "address": "0x0000000000000000000000000000000000000000",
     "verified": false,
-    "model": "BRETT trade-only, fixed supply, no mint"
+    "model": "Fixed-supply community token, decentralized DEX price discovery"
   },
   "dex": {
     "primary": "Aerodrome Finance",
     "pool": "ZRT/WETH - pending deployment",
     "lock": "12 months"
   },
-  "disclaimer": "Educational meme. No intrinsic value."
+  "disclaimer": "Educational experiment on Base L2. No intrinsic value."
 }
