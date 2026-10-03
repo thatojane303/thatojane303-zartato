@@ -1,6 +1,6 @@
 # ZarTATO (ZRT) - Tokenomics
 
-**Model: BRETT on Base (trade-only)**
+**Model:** Fixed-supply community token on Base
 
 - Name: ZarTATO
 - Symbol: ZRT
@@ -12,7 +12,7 @@
 - Community: 45%
 
 **Disclaimer:**
-Educational meme token. No intrinsic value. No peg. No oracle pricing.
+Educational experiment. No intrinsic value. No peg. No oracle pricing.
 Price discovery is 100% via Aerodrome DEX. Thandi oracle is informational only for Discord.
 
 **Structure:**
