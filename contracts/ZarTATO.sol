@@ -1,37 +1,48 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract ZarTATO {
-    string public name = "ZarTATO";
-    string public symbol = "ZRT";
-    uint8 public decimals = 18;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    uint256 public totalSupply = 1_000_000_000 ether;
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+/**
+ * @title ZarTATO (ZRT)
+ * @dev Fixed-supply ERC-20 community token on Base L2
+ *
+ * Educational community token with:
+ * - Fixed supply: 1,000,000,000 ZRT
+ * - No minting, no burning
+ * - Price discovery via Aerodrome DEX only
+ * - Thandi oracle is informational only (Discord bot display)
+ *
+ * Disclaimer: Educational experiment. No intrinsic value, no yield promises.
+ */
 
-    // Price tracking: A‑Grade 10kg potato price in ZAR (or scaled)
-    uint256 public potatoPriceZAR;
-    address public oracle;
+contract ZarTATO is ERC20, Ownable {
+    /// @dev Fixed supply: 1 billion tokens at 18 decimals
+    uint256 public constant FIXED_SUPPLY = 1_000_000_000 * 10 ** 18;
 
-    event PriceUpdated(uint256 newPrice);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-
-    constructor(address _oracle) {
-        oracle = _oracle;
-        balanceOf[msg.sender] = totalSupply;
+    constructor() ERC20("ZarTATO", "ZRT") {
+        // Mint full supply to deployer (should be transferred to LP or team vesting)
+        _mint(msg.sender, FIXED_SUPPLY);
     }
 
-    modifier onlyOracle() {
-        require(msg.sender == oracle, "Not authorized");
-        _;
+    /**
+     * @dev Prevent any new minting
+     * This ensures truly fixed supply
+     */
+    function mint(address to, uint256 amount) public onlyOwner {
+        revert("ZarTATO: minting disabled - fixed supply");
     }
 
-    function updatePrice(uint256 _newPrice) external onlyOracle {
-        potatoPriceZAR = _newPrice;
-        emit PriceUpdated(_newPrice);
+    /**
+     * @dev Prevent burning
+     * Keeps total supply immutable
+     */
+    function burn(uint256 amount) public {
+        revert("ZarTATO: burning disabled - fixed supply");
     }
 
-    // standard ERC‑20 functions...
+    function burnFrom(address account, uint256 amount) public {
+        revert("ZarTATO: burning disabled - fixed supply");
+    }
 }
