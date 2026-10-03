@@ -1,9 +1,9 @@
 # ZarTATO Funding Request — R1.2M
 
-**Model: BRETT Trade-Only on Base (Aerodrome)**
+**Model: Fixed-Supply Community Token on Base (Aerodrome)**
 
 ## Disclaimer
-Educational & cultural meme experiment on Base L2. No intrinsic value, no commodity backing, no yield. Not financial advice.
+Educational experiment on Base L2. No intrinsic value, no commodity backing, no yield. Not financial advice.
 
 ## Ask: R1,200,000 ZAR
 
@@ -18,14 +18,14 @@ Educational & cultural meme experiment on Base L2. No intrinsic value, no commod
 | Legal & Compliance | R100,000 | 8.3% | Educational disclaimer, non-security memo |
 | Ops & Treasury Buffer | R50,000 | 4.2% |  |
 
-## Why BRETT Model?
+## Why This Model?
 
 Previous model (farm/potato backing) = securities risk, fails Aerodrome grant criteria.
-BRETT model:
-- Fixed supply 1B, no mint — simple ERC20
+Current model:
+- Fixed supply 1B, no mint — simple ERC-20
 - Price discovery via Aerodrome DEX only — no off-chain peg
 - No APY/staking promises — avoids yield security classification
-- Fits Base meme culture — educational, community-driven
+- Educational focus — community-driven, compliant
 
 ## Milestones
 
