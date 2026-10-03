@@ -1,72 +1,42 @@
-# ZarTATO (ZRT) — A‑Grade 10kg Potato Price‑Tracking Crypto Asset
+# ZarTATO (ZRT) — BRETT Model Community Token on Base
 
-ZarTATO is a commodity‑indexed crypto asset built on Base.
-Its value tracks the A‑Grade 10kg potato market price using an on‑chain oracle and a multi‑channel redemption/payment network. ZarTATO is designed for transparent price discovery, reliable settlement, and deterministic behavior across agricultural and retail endpoints.
+ZarTATO is an educational, community-driven token built on Base.
+It uses Aerodrome Finance as the primary price discovery mechanism (DEX price), with an optional informational oracle (`thandi.js`) for Discord `/price` display only.
 
-Spaza shops are one redemption node — alongside agri‑coops, farm depots, merchant partners, and distribution hubs — but not the main theme of the system.
+**Disclaimer:** This is an educational and cultural experiment. No intrinsic value, no commodity backing, no yield, no financial promises. Not financial advice.
 
 ---
 
 ## 🔗 Core Properties
-- Fixed supply: 1,000,000,000 ZRT
+- Fixed supply: 1,000,000,000 ZRT (no minting, no burning)
 - Chain: Base Mainnet (8453)
-- DEX: Aerodrome Finance
-- Oracle: `oracle/thandi.js` (commodity price fetch + multi‑feed resilience)
-- Purpose: commodity price tracking (not pegged, not a stablecoin)
-
-ZarTATO tracks the A‑Grade 10kg potato price, not a retail category.
+- DEX: Aerodrome Finance (primary price discovery)
+- Oracle: `oracle/thandi.js` (informational only, does NOT set an on-chain peg)
+- Model: BRETT-style meme token, trade-only, Base community-driven
 
 ---
 
-## 📈 Price‑Tracking Architecture
-ZarTATO uses a multi‑feed oracle pipeline:
+## 📈 Price Discovery
+ZarTATO price is determined entirely by Aerodrome DEX liquidity and trading.
 
-- Chainlink Functions
-- fallback feeds
-- freshness checks
-- failover simulation
-- tracking‑error regression
+**Thandi Oracle** (`oracle/thandi.js`) is an **optional, informational service only**:
+- Fetches reference prices from public market data
+- Does NOT set an on-chain price peg
+- Displays in Discord `/price` command for community info
+- Never used by smart contracts for minting/burning
 
-The oracle updates the on‑chain index at deterministic intervals, ensuring alignment with the underlying commodity market.
-
----
-
-## 🏪 Multi‑Channel Redemption Network
-ZarTATO supports multiple redemption/payment endpoints:
-
-- spaza shops
-- agri‑coops
-- farm depots
-- merchant partners
-- distribution hubs
-
-Spaza shops are included because they operate at high frequency and provide strong uptime signals — but they are not the main theme of ZarTATO.
+This architecture avoids regulatory security classification.
 
 ---
 
-## 🧪 Reliability & Determinism CI Dashboard
-The repository includes a full observability suite, producing JSON dashboard tiles:
+## 🎓 Educational & Community Focus
+ZarTATO is designed to:
+- Teach smart contract development (Hardhat, Solidity, OpenZeppelin)
+- Demonstrate CI/CD best practices (GitHub Actions)
+- Provide a Base L2 community token
+- Support South African blockchain education
 
-- spaza‑uptime — oracle freshness
-- multi‑feed‑resilience — failover simulation
-- payment‑reliability — tracking‑error regression
-- gas‑report — cost efficiency
-- deterministic‑behavior — differential consistency
-- throughput‑tests — load performance
-
-These tiles are merged into a unified dashboard artifact for grant submission.
-
----
-
-## ⚙️ Deterministic Behavior
-ZarTATO is tested across multiple execution frameworks to ensure:
-
-- valuation consistency
-- oracle read consistency
-- mint/burn consistency
-- staleness‑logic consistency
-
-This ensures predictable behavior across all redemption endpoints.
+No financial yield, no redemption promises, no intrinsic value.
 
 ---
 

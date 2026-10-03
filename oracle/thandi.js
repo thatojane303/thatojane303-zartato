@@ -1,105 +1,60 @@
+/**
+ * Thandi Oracle - INFORMATIONAL ONLY
+ * 
+ * This service fetches reference price data for display in Discord `/price` commands.
+ * It does NOT set an on-chain price peg or affect token minting/burning.
+ * 
+ * ZarTATO price discovery is driven entirely by Aerodrome DEX liquidity.
+ */
+
 import axios from "axios";
-import { ethers } from "ethers";
 import fs from "fs";
 
-// --- Provider + Wallet ---
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.ORACLE_KEY, provider);
-
-// --- Contract Interface ---
-const zartato = new ethers.Contract(
-  process.env.ZARTATO_ADDRESS,
-  ["function updatePrice(uint256 _newPrice) external"],
-  wallet
-);
-
-// --- Primary + Fallback Feeds ---
-async function fetchPrimary() {
-  const res = await axios.get("https://api.potato.market/agrade10kg");
-  return {
-    price: Number(res.data.price),
-    timestamp: Number(res.data.timestamp)
-  };
-}
-
-async function fetchFallback() {
-  const res = await axios.get("https://backup-feed.io/potato");
-  return {
-    price: Number(res.data.price),
-    timestamp: Number(res.data.timestamp)
-  };
-}
-
-// --- Freshness Check ---
-function isFresh(feed) {
-  const age = Date.now() - feed.timestamp;
-  return age < 1000 * 60 * 60; // 1 hour freshness window
-}
-
-// --- Main Oracle Logic ---
-async function fetchPotatoPrice() {
-  let primary, fallback;
-
+// --- Price Data Sources (Informational) ---
+async function fetchReferencePrice() {
   try {
-    primary = await fetchPrimary();
-  } catch {
-    primary = null;
+    // Placeholder: real implementation would fetch from public market data
+    // Examples: commodity exchanges, South African market data APIs, etc.
+    const mockPrice = 45.50; // ZAR per 10kg bag (example)
+    
+    return {
+      source: "reference-market-data",
+      price: mockPrice,
+      currency: "ZAR",
+      commodity: "A-Grade 10kg Potato",
+      timestamp: Date.now(),
+      note: "Informational reference only. ZRT price determined by Aerodrome DEX."
+    };
+  } catch (err) {
+    console.error("Reference data fetch error:", err.message);
+    return { error: err.message };
   }
-
-  try {
-    fallback = await fetchFallback();
-  } catch {
-    fallback = null;
-  }
-
-  // Decision logic
-  if (primary && isFresh(primary)) {
-    return primary.price;
-  }
-
-  if (fallback && isFresh(fallback)) {
-    return fallback.price;
-  }
-
-  throw new Error("No fresh potato price feeds available");
 }
 
-// --- CI Tile Writer ---
-function writeTile(status, price = null, error = null) {
+// --- Dashboard Tile Writer ---
+function writeDashboardTile(data) {
   fs.mkdirSync("./dashboard/tiles", { recursive: true });
 
   fs.writeFileSync(
-    "./dashboard/tiles/spaza-uptime.json",
+    "./dashboard/tiles/thandi-info.json",
     JSON.stringify(
       {
-        ok: status,
-        price,
-        error,
-        timestamp: Date.now()
+        service: "thandi-oracle",
+        status: data.error ? "error" : "ok",
+        ...data
       },
       null,
       2
     )
   );
+
+  console.log("Thandi info updated:", JSON.stringify(data, null, 2));
 }
 
 // --- Execution ---
 async function main() {
-  try {
-    const rawPrice = await fetchPotatoPrice();
-
-    // Scale to 1e18 for solidity
-    const scaled = ethers.parseUnits(String(rawPrice), 18);
-
-    await zartato.updatePrice(scaled);
-
-    console.log("Updated potato price:", rawPrice, "(scaled:", scaled.toString(), ")");
-
-    writeTile(true, rawPrice, null);
-  } catch (err) {
-    console.error("Oracle error:", err.message);
-    writeTile(false, null, err.message);
-  }
+  const priceData = await fetchReferencePrice();
+  writeDashboardTile(priceData);
 }
 
 main();

@@ -1,7 +1,7 @@
 {
   "name": "zartato",
   "version": "1.0.0",
-  "description": "ZarTATO (ZRT) - BRETT model meme on Base. Trade-only on Aerodrome, educational, no intrinsic value.",
+  "description": "ZarTATO (ZRT) - Educational community token on Base L2. Fixed supply ERC-20 with price discovery via Aerodrome DEX. No peg, no yield, BRETT model.",
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
