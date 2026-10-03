@@ -1,7 +1,7 @@
 # ZarTATO Grant Submission — Aerodome Base Community Round
 
 **Project:** ZarTATO (ZRT)  
-**Model:** BRETT-style community token on Base L2  
+**Model:** Fixed-supply community token on Base L2  
 **Status:** Ready for audit and mainnet deployment  
 **Ask:** R1,200,000 ZAR  
 
@@ -9,19 +9,19 @@
 
 ## Executive Summary
 
-ZarTATO is an **educational community token** demonstrating:
+ZarTATO is an **educational, fixed-supply community token** demonstrating:
 - **Smart contract development** (Solidity, ERC-20, OpenZeppelin patterns)
 - **CI/CD automation** (GitHub Actions, Hardhat testing)
 - **Base L2 integration** (Aerodrome DEX, optimized gas costs)
 - **Community engagement** (Discord bot, educational content)
 
-It is **NOT** a financial security, yield vehicle, or commodity derivative. ZarTATO is a fixed-supply meme token for Base community building and blockchain education.
+It is **NOT** a financial security, yield vehicle, or commodity derivative. ZarTATO is a fixed-supply community token for Base community building and blockchain education.
 
 ---
 
 ## Model & Risk Mitigation
 
-### BRETT Model (Simple, Compliant)
+### Current Model (Simple, Compliant)
 ✅ Fixed supply: 1,000,000,000 ZRT (no minting, no burning)  
 ✅ Price discovery: **Aerodrome DEX only** (no off-chain peg mechanism)  
 ✅ Thandi Oracle: **Informational only** (displays in Discord, not on-chain)  
@@ -39,7 +39,7 @@ It is **NOT** a financial security, yield vehicle, or commodity derivative. ZarT
 ❌ Reserve-backed minting → likely classified as security  
 ❌ On-chain oracle peg → stablecoin-like structure → regulatory friction  
 
-**Decision:** Pivot to BRETT model for regulatory clarity and grant eligibility.
+**Decision:** Pivot to fixed-supply community model for regulatory clarity and grant eligibility.
 
 ---
 
