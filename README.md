@@ -1,4 +1,4 @@
-# ZarTATO (ZRT) — BRETT Model Community Token on Base
+# ZarTATO (ZRT) — Educational Community Token on Base
 
 ZarTATO is an educational, community-driven token built on Base.
 It uses Aerodrome Finance as the primary price discovery mechanism (DEX price), with an optional informational oracle (`thandi.js`) for Discord `/price` display only.
@@ -12,7 +12,7 @@ It uses Aerodrome Finance as the primary price discovery mechanism (DEX price), 
 - Chain: Base Mainnet (8453)
 - DEX: Aerodrome Finance (primary price discovery)
 - Oracle: `oracle/thandi.js` (informational only, does NOT set an on-chain peg)
-- Model: BRETT-style meme token, trade-only, Base community-driven
+- Model: Fixed-supply community token, decentralized price discovery
 
 ---
 
