@@ -21,7 +21,7 @@ contract ZarTATO is ERC20, Ownable {
     /// @dev Fixed supply: 1 billion tokens at 18 decimals
     uint256 public constant FIXED_SUPPLY = 1_000_000_000 * 10 ** 18;
 
-    constructor() ERC20("ZarTATO", "ZRT") {
+    constructor() ERC20("ZarTATO", "ZRT") Ownable(msg.sender) {
         // Mint full supply to deployer (should be transferred to LP or team vesting)
         _mint(msg.sender, FIXED_SUPPLY);
     }
