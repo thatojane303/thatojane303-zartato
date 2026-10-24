@@ -40,16 +40,4 @@ No financial yield, no redemption promises, no intrinsic value.
 
 ---
 
-## 🚀 Performance & Throughput
-Load tests confirm:
-
-- 312 ops/sec sustained
-- 441 ops/sec peak
-- 18ms average latency
-- 5000 transactions executed
-
-This supports high‑volume retail and agricultural settlement flows.
-
----
-
 ## 📁 Repository Structure
