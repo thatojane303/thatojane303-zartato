@@ -86,19 +86,19 @@ It is **NOT** a financial security, yield vehicle, or commodity derivative. ZarT
 ## Milestones & Deliverables
 
 ### Phase 1: Audit & Verification (Month 1–2)
-✅ Smart contract audit complete  
-✅ BaseScan verification live  
-✅ Disclaimer review with legal  
+☐ Smart contract audit  
+☐ BaseScan verification  
+☐ Disclaimer review with legal  
 
 ### Phase 2: Launch (Month 3)
-✅ Base Mainnet deployment  
-✅ Aerodrome LP seeding + lock  
-✅ Thandi oracle live  
+☐ Base Mainnet deployment  
+☐ Aerodrome LP seeding + lock  
+☐ Thandi oracle live  
 
 ### Phase 3: Community (Month 4–6)
-✅ Musa Bot `/price` command live  
-✅ 3+ South African blockchain education events  
-✅ Documentation & tutorials published  
+☐ Musa Bot `/price` command live  
+☐ 3+ South African blockchain education events  
+☐ Documentation & tutorials published  
 
 ---
 
@@ -115,52 +115,3 @@ It is **NOT** a financial security, yield vehicle, or commodity derivative. ZarT
 ---
 
 ## Repository Structure
-
-```
-thatojane303-zartato/
-├── contracts/                # ERC-20 token + informational oracle
-├── scripts/                  # Hardhat deployment
-├── test/                     # Test suite (Hardhat + Mocha)
-├── oracle/                   # Thandi informational service
-├── .github/workflows/        # CI/CD (GitHub Actions)
-├── docs/                     # Technical docs, tokenomics
-├── FUNDING-r1.2M.md          # Detailed funding request
-├── GRANT_SUBMISSION.md       # This file
-├── README.md                 # Project overview
-└── package.json              # Dependencies
-```
-
----
-
-## Success Metrics
-
-- ✅ Smart contract audit pass  
-- ✅ Mainnet deployment & verification  
-- ✅ Liquidity locked 12 months  
-- ✅ 100+ Discord community members  
-- ✅ 3+ SA education events completed  
-
----
-
-## Compliance & Disclaimers
-
-**ZarTATO is an educational experiment.** It has:
-- No intrinsic value
-- No commodity backing
-- No yield, staking, or APY
-- No financial promises
-- No control over underlying assets
-
-**Price discovery** is determined **entirely by Aerodrome DEX** trading liquidity.  
-**Thandi oracle** is for informational display only and does NOT affect token valuation.
-
----
-
-## Questions?
-
-For technical details, see:
-- **Smart Contract Docs:** `docs/`
-- **Deployment Guide:** `DEPLOYMENT.md`
-- **Funding Breakdown:** `FUNDING-r1.2M.md`
-
-**Repo:** https://github.com/thatojane303/thatojane303-zartato
