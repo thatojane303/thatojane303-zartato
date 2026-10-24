@@ -1,0 +1,15 @@
+{
+  "network": "baseSepolia",
+  "chainId": 84532,
+  "status": "not-deployed",
+  "token": {
+    "name": "ZarTATO",
+    "symbol": "ZRT",
+    "totalSupply": "1000000000",
+    "decimals": 18,
+    "address": "0x0000000000000000000000000000000000000000",
+    "verified": false
+  },
+  "intendedDeployer": "0x1fdd88770343bB07E1859a93B403b1Bc4877Ea8f",
+  "note": "Placeholder. Replace address only after scripts/deploy.js prints a real token address on Base Sepolia."
+}

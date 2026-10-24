@@ -1,24 +1,23 @@
 {
   "name": "zartato",
   "version": "1.0.0",
-  "description": "ZarTATO (ZRT) - Educational community token on Base L2. Fixed supply ERC-20 with decentralized price discovery via Aerodrome DEX.",
-  "main": "index.js",
+  "description": "ZarTATO (ZRT) — educational fixed-supply ERC-20 aimed at Base. Not deployed.",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:testnet": "hardhat run scripts/deploy.js --network baseSepolia",
     "deploy:mainnet": "hardhat run scripts/deploy.js --network baseMainnet"
   },
-  "keywords": ["meme", "base", "aerodrome", "brett-model", "zartato"],
+  "keywords": ["base", "erc20", "zartato"],
   "author": "Thato Jane",
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
-    "discord.js": "^14.14.0"
+    "@openzeppelin/contracts": "^5.0.0"
   },
   "devDependencies": {
-    "hardhat": "^2.19.0",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "ethers": "^6.10.0"
+    "dotenv": "^16.4.5",
+    "ethers": "^6.10.0",
+    "hardhat": "^2.19.0"
   }
 }

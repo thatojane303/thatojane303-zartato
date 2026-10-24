@@ -1,6 +1,7 @@
 {
   "network": "baseMainnet",
   "chainId": 8453,
+  "status": "not-deployed",
   "token": {
     "name": "ZarTATO",
     "symbol": "ZRT",
@@ -8,12 +9,12 @@
     "decimals": 18,
     "address": "0x0000000000000000000000000000000000000000",
     "verified": false,
-    "model": "Fixed-supply community token, decentralized DEX price discovery"
+    "model": "Fixed-supply community token. No on-chain peg."
   },
   "dex": {
     "primary": "Aerodrome Finance",
-    "pool": "ZRT/WETH - pending deployment",
-    "lock": "12 months"
+    "pool": "not created",
+    "lock": "not created"
   },
-  "disclaimer": "Educational experiment on Base L2. No intrinsic value."
+  "disclaimer": "Educational experiment on Base. No intrinsic value. Not deployed."
 }
