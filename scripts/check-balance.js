@@ -2,22 +2,17 @@ const hre = require("hardhat");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
-  const bal = await hre.ethers.provider.getBalance(deployer.address);
-  
-  console.log("\n📋 Wallet Balance Check");
-  console.log("========================");
-  console.log(`Wallet: ${deployer.address}`);
-  console.log(`Balance: ${hre.ethers.formatEther(bal)} tBNB`);
-  
-  if (bal < hre.ethers.parseEther("0.02")) {
-    console.log("\n❌ Insufficient balance for deployment!");
-    console.log("   Need at least 0.02 tBNB to cover gas fees");
-    console.log("   Get test BNB: https://testnet.bnbchain.org/faucet-smart/");
-    process.exitCode = 1;
-  } else {
-    console.log("\n✅ Sufficient balance to deploy!");
+  if (!deployer) {
+    throw new Error("No deployer is configured. Set PRIVATE_KEY before checking a remote deployment wallet.");
   }
-  console.log("========================\n");
+
+  const address = await deployer.getAddress();
+  const balance = await hre.ethers.provider.getBalance(address);
+  const network = await hre.ethers.provider.getNetwork();
+
+  console.log("Wallet:", address);
+  console.log("Network:", hre.network.name, "(chain", network.chainId.toString() + ")");
+  console.log("Balance:", hre.ethers.formatEther(balance), "ETH");
 }
 
 main().catch((err) => {
