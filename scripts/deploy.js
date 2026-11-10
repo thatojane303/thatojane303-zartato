@@ -3,56 +3,47 @@ const fs = require("fs");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
-  console.log("🔑 Deploying with:", deployer.address);
-  const balance = await hre.ethers.provider.getBalance(deployer.address);
-  console.log("💰 Balance:", hre.ethers.formatEther(balance), "ETH on", hre.network.name);
+  if (!deployer) {
+    throw new Error("No deployer is configured. Set PRIVATE_KEY locally or in the manual Base Sepolia workflow.");
+  }
 
-  console.log("\n📦 Deploying ZarTATO (fixed-supply ERC-20)...");
+  const deployerAddress = await deployer.getAddress();
+  console.log("Deploying with:", deployerAddress);
+  const balance = await hre.ethers.provider.getBalance(deployerAddress);
+  console.log("Balance:", hre.ethers.formatEther(balance), "ETH on", hre.network.name);
+
+  console.log("\nDeploying ZarTATO fixed-supply ERC-20...");
   const Token = await hre.ethers.getContractFactory("ZarTATO");
   const token = await Token.deploy();
   await token.waitForDeployment();
   const tokenAddr = await token.getAddress();
-  console.log("✅ ZarTATO deployed to:", tokenAddr);
+  console.log("ZarTATO deployed to:", tokenAddr);
 
-  // Verify supply
   const totalSupply = await token.totalSupply();
-  console.log("📊 Total supply:", hre.ethers.formatEther(totalSupply), "ZRT");
+  const deployerBalance = await token.balanceOf(deployerAddress);
+  const network = await hre.ethers.provider.getNetwork();
 
-  // Check deployer balance (should have full supply)
-  const deployerBalance = await token.balanceOf(deployer.address);
-  console.log("💎 Deployer balance:", hre.ethers.formatEther(deployerBalance), "ZRT");
+  console.log("\nDeployment summary");
+  console.log("Token address:", tokenAddr);
+  console.log("Deployer:", deployerAddress);
+  console.log("Network:", hre.network.name);
+  console.log("Chain ID:", network.chainId.toString());
+  console.log("Total supply:", hre.ethers.formatEther(totalSupply), "ZRT");
+  console.log("Deployer balance:", hre.ethers.formatEther(deployerBalance), "ZRT");
+  console.log("\nNext steps: verify the testnet contract on BaseScan and update the deployment record only after confirming the address.");
+  console.log("This deployment does not create a liquidity pool, lock LP tokens, vest team tokens, or provide a market-price feed.");
 
-  console.log("\n============================================================");
-  console.log(" ZarTATO Deployment Complete 🥔");
-  console.log("============================================================");
-  console.log(" Token Address:  ", tokenAddr);
-  console.log(" Deployer:       ", deployer.address);
-  console.log(" Network:        ", hre.network.name);
-  console.log(" Chain ID:       ", (await hre.ethers.provider.getNetwork()).chainId);
-  console.log(" Total Supply:   ", hre.ethers.formatEther(totalSupply), "ZRT");
-  console.log("============================================================");
-  console.log(" Next steps:");
-  console.log(" 1. Transfer tokens to Aerodrome LP pool (40% locked 12mo)");
-  console.log(" 2. Reserve 15% for team vesting (Sablier)");
-  console.log(" 3. Verify on BaseScan: npx hardhat verify --network baseSepolia <TOKEN_ADDR>");
-  console.log("============================================================\n");
-
-  // Write deployment info to file for CI or later use
   const out = {
     token: tokenAddr,
-    deployer: deployer.address,
+    deployer: deployerAddress,
     network: hre.network.name,
-    chainId: (await hre.ethers.provider.getNetwork()).chainId,
+    chainId: Number(network.chainId),
     totalSupply: totalSupply.toString(),
     timestamp: new Date().toISOString(),
   };
 
-  try {
-    fs.writeFileSync("deployment.json", JSON.stringify(out, null, 2));
-    console.log("✅ deployment.json written");
-  } catch (err) {
-    console.warn("⚠️  Could not write deployment.json:", err.message);
-  }
+  fs.writeFileSync("deployment.json", JSON.stringify(out, null, 2));
+  console.log("Local deployment.json written (ignored by git).");
 }
 
 main().catch((err) => {

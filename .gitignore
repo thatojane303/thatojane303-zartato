@@ -8,6 +8,7 @@ typechain-types
 # Hardhat
 cache
 artifacts
+deployment.json
 
 # IDE
 .idea
