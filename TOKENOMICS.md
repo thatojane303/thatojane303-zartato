@@ -1,22 +1,24 @@
-# ZarTATO (ZRT) - Tokenomics
+# ZarTATO (ZRT) — token design and status
 
-**Model:** Fixed-supply community token on Base
+**Status:** pre-launch design. No Base deployment is recorded in this repository.
+
+## Implemented in the contract
 
 - Name: ZarTATO
 - Symbol: ZRT
-- Supply: 1,000,000,000 fixed, no mint function
-- Chain: Base Mainnet (8453)
-- DEX: Aerodrome Finance (primary liquidity)
-- Liquidity: 40% locked 12 months on deployment
-- Team: 15% 12-month vest
-- Community: 45%
+- Fixed supply: 1,000,000,000 tokens with 18 decimals
+- Intended network: Base
+- The full supply is minted to the deployer at deployment.
+- Public mint and burn entry points revert.
 
-**Disclaimer:**
-Educational experiment. No intrinsic value. No peg. No oracle pricing.
-Price discovery is 100% via Aerodrome DEX. Thandi oracle is informational only for Discord.
+## Not implemented
 
-**Structure:**
-/contracts/ZarTATO.sol -> token
-/bot/musa-bot.js -> Discord bot
-/oracle/thandi.js -> info-only feed
-/deployments/base-mainnet.json -> deployment info
+- No commodity reserve, redemption right, price peg, yield, or staking.
+- No live potato-price oracle or market-data connection.
+- No Aerodrome pool, liquidity lock, team vesting, multisig, or distribution contract.
+
+A 40% liquidity / 15% team / 45% community split has appeared in earlier notes. It is an unimplemented draft only, not a current allocation, lock, vesting schedule, or commitment. The deployer initially receives the full supply. Do not represent proposed percentages as deployed tokenomics.
+
+## Disclaimer
+
+ZRT is an educational experiment with no intrinsic value or commodity backing. This document is not investment advice or a promise of future utility.

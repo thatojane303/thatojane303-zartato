@@ -1,70 +1,48 @@
 # ZarTATO (ZRT)
 
-Educational fixed-supply community token for Base. South African market culture, not a potato peg.
+ZarTATO is an educational, fixed-supply ERC-20 experiment for Base, using South African potato-market culture as a teaching context. It is not a potato peg, a commodity-backed token, or an investment product.
 
-**Disclaimer.** Educational experiment. No intrinsic value, no commodity backing, no yield, no redemption. Not financial advice.
+## Current status
 
-## Status
+Status checked 2026-11-09. This repository is pre-launch; it does not represent a live token or market-data product.
 
-This repository is the source a Base reviewer should read. It is **not** deployed.
-
-| Check | State |
+| Check | Current state |
 | --- | --- |
-| Contract | `contracts/ZarTATO.sol` — ERC-20 + Ownable, Solidity 0.8.20 |
-| Supply | 1,000,000,000 ZRT, minted once to the deployer |
-| Mint / burn | Both revert |
-| Tests | 17 passing (`npx hardhat test`) |
-| Base Sepolia (84532) | Not deployed |
-| Base mainnet (8453) | Not deployed |
-| Aerodrome pool | Not created |
-| Audit | Not started |
-| Builder Code | Not registered |
-| Intended deployer | `0x1fdd88770343bB07E1859a93B403b1Bc4877Ea8f` |
+| Contract | Fixed-supply ERC-20 in contracts/ZarTATO.sol |
+| Supply | 1,000,000,000 ZRT minted once to the deployer when deployed |
+| Mint and burn | Public entry points revert; no further issuance is intended |
+| Base Sepolia | No deployed contract address recorded; deployment file is still a zero-address placeholder |
+| Base mainnet | Not deployed |
+| Public product demo | No working demo verified; the previously configured Vercel URL returned 404 on 2026-11-09 |
+| Market data | oracle/thandi.js is a local mock only; no live market source or onchain oracle is connected |
+| Liquidity and vesting | No pool, LP lock, or vesting contract exists |
+| Security review | Not audited |
+| Tests | 17 Hardhat tests are included; run the commands below and check the PR workflow before relying on them |
 
-The zero address in `deployments/` is a placeholder. It is not the token.
+The full grant-readiness status and draft are in GRANT_SUBMISSION.md. Base describes its grants as selective, up to $5,000, and identifies Builder Codes as the first step toward grant eligibility. This repository alone does not establish eligibility or guarantee funding.
 
-Grant packet: [GRANT_SUBMISSION.md](GRANT_SUBMISSION.md).
+## Run locally
 
-Older notes (`FUNDING-r1.2M.md`, `COMPLETION_SUMMARY.md`, BSC scripts) are not the current application. Do not quote them as shipped work.
+Use Node.js 22. Install the locked dependencies and run the compiler and tests:
 
-## What a reviewer can run
+1. npm ci
+2. npm run compile
+3. npm test
 
-```bash
-git clone https://github.com/thatojane303/thatojane303-zartato.git
-cd thatojane303-zartato
-npm install
-npx hardhat compile
-npx hardhat test
-```
+The test and compile commands do not require a private key.
 
-Node 20. `dotenv` is required because `hardhat.config.js` loads `.env`.
+## Base Sepolia deployment
 
-## Deploy (when the wallet has gas)
+Deployment is manual and requires a funded test wallet. Copy .env.example to .env and set PRIVATE_KEY locally; never commit .env or paste a private key into an issue, PR, or chat. Then run npm run deploy:testnet. The optional GitHub workflow also requires an explicit confirmation input.
 
-Do this from your own machine. Do not commit a private key. `.env` is gitignored.
+Do not deploy to Base mainnet until a Base Sepolia deployment is verified, the ownership and token-distribution plan are clear, and an independent security review is complete. No deployment was performed as part of this repository change.
 
-```bash
-cp .env.example .env
-# set PRIVATE_KEY locally — never paste it into git
-npx hardhat run scripts/deploy.js --network baseSepolia
-```
+## Design boundaries
 
-Test ETH: [Coinbase CDP faucet](https://portal.cdp.coinbase.com/products/faucet), network **Base Sepolia**.
-
-Then verify:
-
-```bash
-npx hardhat verify --network baseSepolia <TOKEN_ADDRESS>
-```
-
-Write the printed address into `deployments/base-sepolia.json` and the README status table. Mainnet comes after that address is verified. Gas for a first deploy is small. A paid audit is a later decision, not a claim this repo has already passed.
-
-## Design
-
-- Price, once a pool exists, comes from an Aerodrome ZRT/WETH market. The contract does not read a price.
-- `oracle/thandi.js` is an off-chain display script only. No contract calls it.
-- There is no staking, fee switch, or redemption for potatoes.
+- The contract mints its fixed supply once to the deployer. It does not implement reserves, a price peg, redemption, fees, staking, liquidity locks, or team vesting.
+- No Aerodrome pool exists in this repository state.
+- Thandi is a local mock display script, not a live oracle or source of token pricing.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See LICENSE.

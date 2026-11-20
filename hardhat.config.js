@@ -1,7 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x" + "0".repeat(64);
+// Do not silently fall back to a publicly known or placeholder key.
+const privateKey = process.env.PRIVATE_KEY?.trim();
+const accounts = privateKey ? [privateKey] : [];
 
 module.exports = {
   solidity: {
@@ -16,12 +18,12 @@ module.exports = {
   networks: {
     baseMainnet: {
       url: process.env.BASE_MAINNET_RPC || "https://mainnet.base.org",
-      accounts: [PRIVATE_KEY],
+      accounts,
       chainId: 8453,
     },
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org",
-      accounts: [PRIVATE_KEY],
+      accounts,
       chainId: 84532,
     },
     hardhat: {},

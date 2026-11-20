@@ -1,21 +1,30 @@
 name: Deploy to Base Sepolia
 
-# Manual only. A push to main must not spend a key or deploy a token.
 on:
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type base-sepolia to confirm a testnet deployment
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
+    if: ${{ inputs.confirm == 'base-sepolia' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Install
-        run: npm install --no-audit --no-fund
-      - name: Deploy ZarTATO
-        run: npx hardhat run scripts/deploy.js --network baseSepolia
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Deploy to Base Sepolia
+        run: npm run deploy:testnet
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           BASE_SEPOLIA_RPC: ${{ secrets.BASE_SEPOLIA_RPC }}

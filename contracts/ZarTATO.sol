@@ -30,7 +30,7 @@ contract ZarTATO is ERC20, Ownable {
      * @dev Prevent any new minting
      * This ensures truly fixed supply
      */
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address, uint256) public view onlyOwner {
         revert("ZarTATO: minting disabled - fixed supply");
     }
 
@@ -38,11 +38,11 @@ contract ZarTATO is ERC20, Ownable {
      * @dev Prevent burning
      * Keeps total supply immutable
      */
-    function burn(uint256 amount) public {
+    function burn(uint256) public pure {
         revert("ZarTATO: burning disabled - fixed supply");
     }
 
-    function burnFrom(address account, uint256 amount) public {
+    function burnFrom(address, uint256) public pure {
         revert("ZarTATO: burning disabled - fixed supply");
     }
 }

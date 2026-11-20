@@ -1,47 +1,20 @@
-# Pull Request: ZarTATO Smart Contract Implementation
+# Change summary
 
-## Description
-This pull request introduces the complete ZarTATO smart contract ecosystem, including:
-- ERC-20 token with reserve backing
-- Chainlink Functions oracle integration
-- Automated price updates from 3 South African potato markets
-- Comprehensive test suite
-- GitHub Actions CI/CD workflow
+What changed and why?
 
-## Changes
-- ✅ Smart contracts (ZarTATO.sol, ZarTATOOracle.sol, MockFunctionsRouter.sol)
-- ✅ Hardhat configuration and deployment scripts
-- ✅ Chainlink Functions JavaScript source
-- ✅ Unit tests for reserve constraints and oracle integration
-- ✅ GitHub Actions workflow for daily price updates
-- ✅ Complete documentation and narration scripts
+## Validation
 
-## Type of Change
-- [x] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Documentation update
+- [ ] npm ci
+- [ ] npm run compile
+- [ ] npm test
+- [ ] Documentation matches the current Base fixed-supply contract
+- [ ] No secrets, invented usage metrics, or deployment claims were added
 
-## How Has This Been Tested?
-- Unit tests: `npm test`
-- Local deployment: `npx hardhat run scripts/deploy.js --network bsctestnet`
-- Contract verification: BSCScan Testnet
+## Deployment impact
 
-## Checklist
-- [x] My code follows the style guidelines
-- [x] I have performed a self-review of my own code
-- [x] I have commented my code, particularly in hard-to-understand areas
-- [x] I have made corresponding changes to the documentation
-- [x] My changes generate no new warnings
+- [ ] No deployment performed
+- [ ] If testnet deployment is required, describe it and link the verified transaction
 
-## Related Issues
-None yet (initial implementation)
+## Grant-readiness claims
 
-## Deployment Notes
-After merging, follow these steps:
-1. Create a Chainlink Functions subscription on BSC Testnet
-2. Fund with LINK tokens
-3. Add the deployed oracle as a consumer
-4. Set GitHub Actions secrets: `PRIVATE_KEY`, `ORACLE_ADDR`, `SUB_ID`
-
----
-**Reviewers:** @thatojane303
+List any new claims about users, usage, Builder Codes, contracts, liquidity, vesting, data sources, or audits and link to verifiable evidence. Mark future work as planned.
