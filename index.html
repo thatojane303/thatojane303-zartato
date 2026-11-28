@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZarTATO (ZRT) — Educational Token on Base</title>
+  <meta name="description" content="ZarTATO is an educational fixed-supply ERC-20 experiment on Base. South African potato-market culture as teaching context. Not a commodity peg or investment product." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            potato: {
+              50:  '#fdf8f0',
+              100: '#f9edd9',
+              200: '#f2d6a8',
+              300: '#e8b86e',
+              400: '#dc9540',
+              500: '#c97a2a',
+              600: '#a85f20',
+              700: '#87491c',
+              800: '#6f3c1c',
+              900: '#5c331a',
+            },
+            base: {
+              500: '#0052ff',
+              600: '#0040cc',
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --card: #141416;
+      --border: #27272a;
+    }
+    body {
+      background: var(--bg);
+      color: #f4f4f5;
+    }
+    .glass {
+      background: rgba(20, 20, 22, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .potato-gradient {
+      background: linear-gradient(135deg, #c97a2a 0%, #e8b86e 50%, #f2d6a8 100%);
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #e8b86e, #dc9540);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .chart-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #c97a2a, #dc9540);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(201, 122, 42, 0.35);
+    }
+    .card-hover {
+      transition: all 0.25s ease;
+    }
+    .card-hover:hover {
+      border-color: rgba(232, 184, 110, 0.25);
+      transform: translateY(-2px);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0b; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- Navigation -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl potato-gradient flex items-center justify-center text-lg shadow-lg group-hover:scale-105 transition">
+          🥔
+        </div>
+        <span class="font-semibold text-lg tracking-tight">ZarTATO</span>
+        <span class="hidden sm:inline text-xs font-mono text-zinc-500 bg-zinc-800/80 px-2 py-0.5 rounded-full">ZRT</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+        <a href="#stats" class="hover:text-potato-300 transition">Stats</a>
+        <a href="#tokenomics" class="hover:text-potato-300 transition">Tokenomics</a>
+        <a href="#learn" class="hover:text-potato-300 transition">Learn</a>
+        <a href="#status" class="hover:text-potato-300 transition">Status</a>
+      </div>
+
+      <button id="connectBtn" onclick="connectWallet()" class="btn-primary text-sm font-medium px-4 py-2 rounded-xl text-white flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span id="walletLabel">Connect Wallet</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative pt-28 pb-20 overflow-hidden">
+    <!-- Background accents -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-20 left-1/4 w-72 h-72 bg-potato-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-10 right-1/4 w-96 h-96 bg-base-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 relative">
+      <div class="flex flex-col lg:flex-row items-center gap-12">
+        <div class="flex-1 text-center lg:text-left">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            Educational Experiment · Pre-Launch
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+            South African<br />
+            <span class="text-gradient">Potato Culture</span><br />
+            on Base
+          </h1>
+
+          <p class="text-lg text-zinc-400 max-w-xl mb-8 leading-relaxed">
+            ZarTATO (ZRT) is a fixed-supply educational ERC-20 token. It uses potato-market culture as a teaching context for smart contracts, Base L2, and community tokens — not a commodity peg or investment product.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <a href="#status" class="btn-primary px-6 py-3 rounded-xl font-medium text-white text-center">
+              View Current Status
+            </a>
+            <a href="https://github.com/thatojane303/thatojane303-zartato" target="_blank" rel="noopener" class="px-6 py-3 rounded-xl font-medium border border-zinc-700 hover:border-zinc-500 transition text-center flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Floating potato card -->
+        <div class="relative">
+          <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-3xl glass card-hover p-6 flex flex-col items-center justify-center animate-float">
+            <div class="text-7xl mb-4">🥔</div>
+            <div class="text-2xl font-bold tracking-tight">ZRT</div>
+            <div class="text-sm text-zinc-500 mt-1">1,000,000,000 fixed</div>
+            <div class="mt-4 flex items-center gap-2 text-xs text-zinc-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Base · Educational
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section id="stats" class="py-16 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass rounded-2xl p-5 card-hover">
+          <div class="text-xs text-zinc-500 uppercase tracking-wider mb-2">Total Supply</div>
+          <div class="text-2xl font-semibold font-mono">1B</div>
+          <div class="text-sm text-zinc-400 mt-1">ZRT · Fixed</div>
+        </div>
+        <div class="glass rounded-2xl p-5 card-hover">
+          <div class="text-xs text-zinc-500 uppercase tracking-wider mb-2">Network</div>
+          <div class="text-2xl font-semibold">Base</div>
+          <div class="text-sm text-zinc-400 mt-1">Chain ID 8453</div>
+        </div>
+        <div class="glass rounded-2xl p-5 card-hover">
+          <div class="text-xs text-zinc-500 uppercase tracking-wider mb-2">Mint / Burn</div>
+          <div class="text-2xl font-semibold text-rose-400">Disabled</div>
+          <div class="text-sm text-zinc-400 mt-1">Immutable supply</div>
+        </div>
+        <div class="glass rounded-2xl p-5 card-hover">
+          <div class="text-xs text-zinc-500 uppercase tracking-wider mb-2">Status</div>
+          <div class="text-2xl font-semibold text-amber-400">Pre-Launch</div>
+          <div class="text-sm text-zinc-400 mt-1">Not deployed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo / Price Simulator -->
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="glass rounded-3xl p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold">Reference Price Simulator</h2>
+            <p class="text-sm text-zinc-500 mt-1">Educational only · Simulated random walk · Not live market data</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-2xl font-mono font-semibold text-potato-300" id="simPrice">R 48.20</div>
+              <div class="text-xs" id="simChange">+0.00%</div>
+            </div>
+            <button onclick="toggleSim()" id="simBtn" class="px-3 py-1.5 text-xs rounded-lg border border-zinc-700 hover:border-zinc-500 transition">
+              Pause
+            </button>
+          </div>
+        </div>
+
+        <div class="relative h-48 sm:h-56 rounded-xl chart-grid overflow-hidden bg-zinc-900/50">
+          <canvas id="priceChart" class="w-full h-full"></canvas>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-4 text-xs text-zinc-500">
+          <span>Unit: ZAR per 10kg bag (reference)</span>
+          <span>·</span>
+          <span>Real ZRT price would be set only by Aerodrome DEX liquidity after launch</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tokenomics -->
+  <section id="tokenomics" class="py-16 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="mb-10">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-3">Token Design</h2>
+        <p class="text-zinc-400 max-w-2xl">What is implemented in the contract versus what remains design notes only.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <h3 class="font-semibold text-emerald-400">Implemented</h3>
+          </div>
+          <ul class="space-y-3 text-sm text-zinc-300">
+            <li class="flex gap-3">
+              <span class="text-emerald-500 mt-0.5">✓</span>
+              <span>Fixed supply of 1,000,000,000 ZRT (18 decimals)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-emerald-500 mt-0.5">✓</span>
+              <span>Full supply minted once to deployer at deployment</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-emerald-500 mt-0.5">✓</span>
+              <span>Public <code class="text-xs bg-zinc-800 px-1.5 py-0.5 rounded">mint</code> and <code class="text-xs bg-zinc-800 px-1.5 py-0.5 rounded">burn</code> revert</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-emerald-500 mt-0.5">✓</span>
+              <span>Standard ERC-20 transfer / approve / allowance</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-emerald-500 mt-0.5">✓</span>
+              <span>17 Hardhat tests covering fixed-supply rules</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
+            <h3 class="font-semibold text-zinc-400">Not Implemented</h3>
+          </div>
+          <ul class="space-y-3 text-sm text-zinc-400">
+            <li class="flex gap-3">
+              <span class="text-zinc-600 mt-0.5">–</span>
+              <span>No commodity reserve or redemption right</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-zinc-600 mt-0.5">–</span>
+              <span>No on-chain price peg or oracle</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-zinc-600 mt-0.5">–</span>
+              <span>No Aerodrome pool, LP lock, or vesting</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-zinc-600 mt-0.5">–</span>
+              <span>No staking, yield, or fees</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-zinc-600 mt-0.5">–</span>
+              <span>No live market-data connection</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 text-sm text-amber-200/80">
+        <strong class="text-amber-400">Note:</strong> Earlier notes mentioned a 40% liquidity / 15% team / 45% community split. That is an unimplemented draft only. The deployer currently receives the full supply. Do not treat proposed percentages as live tokenomics.
+      </div>
+    </div>
+  </section>
+
+  <!-- Learn -->
+  <section id="learn" class="py-16 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="mb-10">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-3">What You Can Learn</h2>
+        <p class="text-zinc-400 max-w-2xl">ZarTATO is intentionally simple so the educational value stays clear.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-potato-500/15 flex items-center justify-center text-xl mb-4">📜</div>
+          <h3 class="font-semibold mb-2">Solidity & OpenZeppelin</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Fixed-supply ERC-20 pattern, Ownable, and deliberately reverting mint/burn entry points.</p>
+        </div>
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-base-500/15 flex items-center justify-center text-xl mb-4">⚡</div>
+          <h3 class="font-semibold mb-2">Base L2 Deployment</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Hardhat config for Base Sepolia and Base mainnet, deployment scripts, and network awareness.</p>
+        </div>
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-xl mb-4">🧪</div>
+          <h3 class="font-semibold mb-2">Testing Discipline</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">17 tests that assert name, symbol, supply, transfers, and that mint/burn always revert.</p>
+        </div>
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-violet-500/15 flex items-center justify-center text-xl mb-4">🔄</div>
+          <h3 class="font-semibold mb-2">CI with GitHub Actions</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Compile + test workflow that runs on every push and pull request to main.</p>
+        </div>
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center text-xl mb-4">🛡️</div>
+          <h3 class="font-semibold mb-2">Honest Documentation</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Clear separation between implemented features and future ideas — critical for grants and trust.</p>
+        </div>
+        <div class="glass rounded-2xl p-6 card-hover">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/15 flex items-center justify-center text-xl mb-4">🌍</div>
+          <h3 class="font-semibold mb-2">Cultural Context</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Using South African potato-market culture as a narrative layer without overclaiming real-world backing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status -->
+  <section id="status" class="py-16 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="mb-10">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-3">Current Status</h2>
+        <p class="text-zinc-400">Checked against repository state. No invented metrics.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-zinc-800 text-left text-zinc-500">
+              <th class="pb-3 font-medium">Check</th>
+              <th class="pb-3 font-medium">State</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/80">
+            <tr>
+              <td class="py-3.5 text-zinc-300">Contract</td>
+              <td class="py-3.5">Fixed-supply ERC-20 in <code class="text-xs bg-zinc-800 px-1.5 py-0.5 rounded">contracts/ZarTATO.sol</code></td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Supply</td>
+              <td class="py-3.5">1,000,000,000 ZRT minted once to deployer when deployed</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Base Sepolia</td>
+              <td class="py-3.5"><span class="text-amber-400">Not deployed</span> — placeholder zero address</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Base Mainnet</td>
+              <td class="py-3.5"><span class="text-amber-400">Not deployed</span></td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Aerodrome pool</td>
+              <td class="py-3.5">Does not exist</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Thandi oracle</td>
+              <td class="py-3.5">Local mock only — no live market source</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Security review</td>
+              <td class="py-3.5">Not audited</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 text-zinc-300">Tests</td>
+              <td class="py-3.5">17 Hardhat tests included</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wallet / Interactive Panel -->
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="glass rounded-3xl p-6 sm:p-8">
+        <h2 class="text-xl font-semibold mb-6">Interactive Panel</h2>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Wallet -->
+          <div>
+            <h3 class="text-sm font-medium text-zinc-400 mb-3">Wallet</h3>
+            <div id="walletPanel" class="space-y-3">
+              <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+                <span class="text-sm text-zinc-400">Status</span>
+                <span id="walletStatus" class="text-sm font-medium text-zinc-300">Disconnected</span>
+              </div>
+              <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+                <span class="text-sm text-zinc-400">Network</span>
+                <span id="networkStatus" class="text-sm font-medium text-zinc-300">—</span>
+              </div>
+              <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+                <span class="text-sm text-zinc-400">Address</span>
+                <span id="addressStatus" class="text-sm font-mono text-zinc-300">—</span>
+              </div>
+            </div>
+            <button onclick="connectWallet()" class="mt-4 w-full btn-primary py-3 rounded-xl font-medium text-white">
+              Connect / Switch Wallet
+            </button>
+          </div>
+
+          <!-- Quick links -->
+          <div>
+            <h3 class="text-sm font-medium text-zinc-400 mb-3">Resources</h3>
+            <div class="space-y-2">
+              <a href="https://github.com/thatojane303/thatojane303-zartato" target="_blank" rel="noopener" class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 transition group">
+                <span class="text-sm">GitHub Repository</span>
+                <svg class="w-4 h-4 text-zinc-500 group-hover:text-potato-300 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+              <a href="https://github.com/thatojane303/thatojane303-zartato/blob/main/contracts/ZarTATO.sol" target="_blank" rel="noopener" class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 transition group">
+                <span class="text-sm">ZarTATO.sol Contract</span>
+                <svg class="w-4 h-4 text-zinc-500 group-hover:text-potato-300 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+              <a href="https://docs.base.org" target="_blank" rel="noopener" class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 transition group">
+                <span class="text-sm">Base Documentation</span>
+                <svg class="w-4 h-4 text-zinc-500 group-hover:text-potato-300 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+              <a href="https://aerodrome.finance" target="_blank" rel="noopener" class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 transition group">
+                <span class="text-sm">Aerodrome Finance</span>
+                <svg class="w-4 h-4 text-zinc-500 group-hover:text-potato-300 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Disclaimer -->
+  <section class="py-12 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-500 leading-relaxed">
+        <strong class="text-zinc-400">Disclaimer.</strong>
+        ZarTATO is an educational and cultural experiment. It has no intrinsic value, no commodity backing, no yield, and no financial promises. This site is not financial advice. The token is not deployed. Any future deployment would still be educational in nature.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-10 border-t border-zinc-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🥔</span>
+        <span>ZarTATO · Educational token on Base</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/thatojane303/thatojane303-zartato" class="hover:text-potato-300 transition">GitHub</a>
+        <a href="https://github.com/thatojane303/thatojane303-zartato/blob/main/LICENSE" class="hover:text-potato-300 transition">MIT License</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- Price Simulator ----------
+    const canvas = document.getElementById('priceChart');
+    const ctx = canvas.getContext('2d');
+    let prices = [];
+    let running = true;
+    let basePrice = 48.20;
+    let currentPrice = basePrice;
+    const MAX_POINTS = 80;
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * devicePixelRatio;
+      canvas.height = rect.height * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      drawChart();
+    }
+
+    function drawChart() {
+      const w = canvas.width / devicePixelRatio;
+      const h = canvas.height / devicePixelRatio;
+      ctx.clearRect(0, 0, w, h);
+
+      if (prices.length < 2) return;
+
+      const min = Math.min(...prices) * 0.995;
+      const max = Math.max(...prices) * 1.005;
+      const range = max - min || 1;
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(201, 122, 42, 0.25)');
+      grad.addColorStop(1, 'rgba(201, 122, 42, 0)');
+
+      ctx.beginPath();
+      prices.forEach((p, i) => {
+        const x = (i / (MAX_POINTS - 1)) * w;
+        const y = h - ((p - min) / range) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      const lastX = ((prices.length - 1) / (MAX_POINTS - 1)) * w;
+      ctx.lineTo(lastX, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      prices.forEach((p, i) => {
+        const x = (i / (MAX_POINTS - 1)) * w;
+        const y = h - ((p - min) / range) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#dc9540';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Dot at end
+      const lastY = h - ((prices[prices.length - 1] - min) / range) * (h - 20) - 10;
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#e8b86e';
+      ctx.fill();
+    }
+
+    function tick() {
+      if (!running) return;
+      const change = (Math.random() - 0.48) * 0.35;
+      currentPrice = Math.max(30, Math.min(70, currentPrice + change));
+      prices.push(currentPrice);
+      if (prices.length > MAX_POINTS) prices.shift();
+
+      const pct = ((currentPrice - basePrice) / basePrice) * 100;
+      document.getElementById('simPrice').textContent = 'R ' + currentPrice.toFixed(2);
+      const changeEl = document.getElementById('simChange');
+      changeEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      changeEl.className = 'text-xs ' + (pct >= 0 ? 'text-emerald-400' : 'text-rose-400');
+
+      drawChart();
+    }
+
+    function toggleSim() {
+      running = !running;
+      document.getElementById('simBtn').textContent = running ? 'Pause' : 'Resume';
+    }
+
+    // Seed initial data
+    for (let i = 0; i < 40; i++) {
+      currentPrice = Math.max(30, Math.min(70, currentPrice + (Math.random() - 0.5) * 0.4));
+      prices.push(currentPrice);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    setInterval(tick, 900);
+
+    // ---------- Wallet ----------
+    let accounts = [];
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert('No Ethereum wallet detected. Install MetaMask or another Base-compatible wallet.');
+        return;
+      }
+      try {
+        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        updateWalletUI();
+
+        // Try switch to Base if not already
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        if (chainId !== '0x2105') { // Base mainnet
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x2105' }],
+            });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: '0x2105',
+                  chainName: 'Base',
+                  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://mainnet.base.org'],
+                  blockExplorerUrls: ['https://basescan.org'],
+                }],
+              });
+            }
+          }
+        }
+        updateWalletUI();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function updateWalletUI() {
+      const statusEl = document.getElementById('walletStatus');
+      const networkEl = document.getElementById('networkStatus');
+      const addressEl = document.getElementById('addressStatus');
+      const labelEl = document.getElementById('walletLabel');
+
+      if (accounts.length === 0) {
+        statusEl.textContent = 'Disconnected';
+        networkEl.textContent = '—';
+        addressEl.textContent = '—';
+        labelEl.textContent = 'Connect Wallet';
+        return;
+      }
+
+      statusEl.textContent = 'Connected';
+      statusEl.className = 'text-sm font-medium text-emerald-400';
+      const short = accounts[0].slice(0, 6) + '…' + accounts[0].slice(-4);
+      addressEl.textContent = short;
+      labelEl.textContent = short;
+
+      try {
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const names = {
+          '0x2105': 'Base Mainnet',
+          '0x14a34': 'Base Sepolia',
+          '0x1': 'Ethereum',
+        };
+        networkEl.textContent = names[chainId] || chainId;
+        if (chainId === '0x2105' || chainId === '0x14a34') {
+          networkEl.className = 'text-sm font-medium text-emerald-400';
+        }
+      } catch (_) {}
+    }
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accs) => {
+        accounts = accs;
+        updateWalletUI();
+      });
+      window.ethereum.on('chainChanged', () => updateWalletUI());
+      // Check if already connected
+      window.ethereum.request({ method: 'eth_accounts' }).then(accs => {
+        if (accs.length) {
+          accounts = accs;
+          updateWalletUI();
+        }
+      });
+    }
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        if (id.length > 1) {
+          e.preventDefault();
+          document.querySelector(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
